@@ -1,0 +1,13 @@
+setup.py
+tlxblock/__init__.py
+tlxblock/tlxblock.py
+tlxblock/static/README.txt
+tlxblock/static/css/tlxblock.css
+tlxblock/static/html/tlxblock.html
+tlxblock/static/js/src/tlxblock.js
+tlxblock_xblock.egg-info/PKG-INFO
+tlxblock_xblock.egg-info/SOURCES.txt
+tlxblock_xblock.egg-info/dependency_links.txt
+tlxblock_xblock.egg-info/entry_points.txt
+tlxblock_xblock.egg-info/requires.txt
+tlxblock_xblock.egg-info/top_level.txt

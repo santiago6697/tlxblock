@@ -1,0 +1,9 @@
+/* CSS for TrafficLightXBlock */
+
+.tlxblock_block .count {
+    font-weight: bold;
+}
+
+.tlxblock_block p {
+    cursor: pointer;
+}
