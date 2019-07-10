@@ -1,11 +1,16 @@
 """TO-DO: Write a description of what this XBlock is."""
 
+import os                                   # This module is required to access ENV vars.
+import requests                             # This module is used to perform HTTP requests.
 import pkg_resources
 
 from xblock.core import XBlock
 from xblock.fields import Integer, Scope
 from xblock.fragment import Fragment
 
+OPEN_EDX_COURSES_API_TOKEN = os.environ['OPEN_EDX_COURSES_API_TOKEN']
+OPEN_EDX_COURSES_API_USERNAME = os.environ['OPEN_EDX_COURSES_API_USERNAME']
+OPEN_EDX_URI = os.environ['OPEN_EDX_URI']
 
 class TrafficLightXBlock(XBlock):
     """
@@ -42,6 +47,11 @@ class TrafficLightXBlock(XBlock):
     # TO-DO: change this handler to perform your own actions.  You may need more
     # than one handler, or you may not need any handlers at all.
     @XBlock.json_handler
+    def traffic_light (self, data, suffix=''):
+        req = api_request()
+        return {"count": req.content}
+    
+    @XBlock.json_handler
     def increment_count(self, data, suffix=''):
         """
         An example handler, which increments the data.
@@ -69,3 +79,17 @@ class TrafficLightXBlock(XBlock):
                 </vertical_demo>
              """),
         ]
+
+def api_request ():
+    api_path = "api/courses/v1/blocks/"
+    headers = {
+        "Authorization": "Bearer "+OPEN_EDX_COURSES_API_TOKEN
+        }
+    params = {
+        "course_id": "course-v1:edX+DemoX+Demo_Course", # TODO: Obtain it dinamically.
+        "username": OPEN_EDX_COURSES_API_USERNAME,
+        "requested_fields": "due",
+        "depth": "all"
+    }
+    return requests.get(url = OPEN_EDX_URI+api_path, params = params, headers = headers)
+    
