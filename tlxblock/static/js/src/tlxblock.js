@@ -2,7 +2,7 @@
 function TrafficLightXBlock(runtime, element) {
 
     function updateCount(result) {
-        // $('.count', element).text(result.count);
+        $('.count', element).text(result.count);
         console.log(result);
     }
 

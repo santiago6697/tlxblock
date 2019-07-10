@@ -1,8 +1,10 @@
 """TO-DO: Write a description of what this XBlock is."""
 
 import os                                   # This module is required to access ENV vars.
+import json                                 # This module is required to parse text into JSON.
 import requests                             # This module is used to perform HTTP requests.
 import pkg_resources
+from datetime import datetime
 
 from xblock.core import XBlock
 from xblock.fields import Integer, Scope
@@ -49,7 +51,12 @@ class TrafficLightXBlock(XBlock):
     @XBlock.json_handler
     def traffic_light (self, data, suffix=''):
         req = api_request()
-        return {"count": req.content}
+        blocks = json.loads(req.content)['blocks']
+        due_time = blocks['block-v1:edX+DemoX+Demo_Course+type@problem+block@d1b84dcd39b0423d9e288f27f0f7f242']['due']
+        due_time = datetime.strptime(due_time, '%Y-%m-%dT%H:%M:%SZ')
+        time_now = datetime.now()
+        timestamp_delta = str(due_time - time_now)
+        return {"count": timestamp_delta}
     
     @XBlock.json_handler
     def increment_count(self, data, suffix=''):
@@ -84,7 +91,7 @@ def api_request ():
     api_path = "api/courses/v1/blocks/"
     headers = {
         "Authorization": "Bearer "+OPEN_EDX_COURSES_API_TOKEN
-        }
+    }
     params = {
         "course_id": "course-v1:edX+DemoX+Demo_Course", # TODO: Obtain it dinamically.
         "username": OPEN_EDX_COURSES_API_USERNAME,
