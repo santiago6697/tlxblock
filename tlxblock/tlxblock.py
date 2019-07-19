@@ -10,9 +10,12 @@ from xblock.core import XBlock
 from xblock.fields import Integer, Scope
 from xblock.fragment import Fragment
 
-OPEN_EDX_COURSES_API_TOKEN = os.environ['OPEN_EDX_COURSES_API_TOKEN']
-OPEN_EDX_COURSES_API_USERNAME = os.environ['OPEN_EDX_COURSES_API_USERNAME']
-OPEN_EDX_URI = os.environ['OPEN_EDX_URI']
+# OPEN_EDX_COURSES_API_TOKEN = os.environ['OPEN_EDX_COURSES_API_TOKEN']
+# OPEN_EDX_COURSES_API_USERNAME = os.environ['OPEN_EDX_COURSES_API_USERNAME']
+# OPEN_EDX_URI = os.environ['OPEN_EDX_URI']
+OPEN_EDX_COURSES_API_TOKEN = "6ff56cc112717df4f22d58b1058e60d375979cc6"
+OPEN_EDX_COURSES_API_USERNAME = "root"
+OPEN_EDX_URI = "http://192.168.33.10/"
 
 class TrafficLightXBlock(XBlock):
     """
@@ -24,7 +27,7 @@ class TrafficLightXBlock(XBlock):
 
     # TO-DO: delete count, and define your own fields.
     count = Integer(
-        default=0, scope=Scope.user_state,
+        default=10, scope=Scope.user_state,
         help="A simple counter, to show something happening",
     )
 
@@ -50,13 +53,25 @@ class TrafficLightXBlock(XBlock):
     # than one handler, or you may not need any handlers at all.
     @XBlock.json_handler
     def traffic_light (self, data, suffix=''):
-        req = api_request()
-        blocks = json.loads(req.content)['blocks']
-        due_time = blocks['block-v1:edX+DemoX+Demo_Course+type@problem+block@d1b84dcd39b0423d9e288f27f0f7f242']['due']
-        due_time = datetime.strptime(due_time, '%Y-%m-%dT%H:%M:%SZ')
-        time_now = datetime.now()
-        timestamp_delta = str(due_time - time_now)
-        return {"count": timestamp_delta}
+        res = {}
+        try:
+            req = api_request(self)
+            blocks = json.loads(req.content)['blocks']
+            due_date = blocks[str(self.parent)]['due']
+            # due_date = blocks["block-v1:edX+DemoX+Demo_Course+type@vertical+block@934cc32c177d41b580c8413e561346b3"]['due']
+            due_date = datetime.strptime(due_date, '%Y-%m-%dT%H:%M:%SZ')
+            date_now = datetime.now()
+            timestamp_delta = (due_date - date_now).total_seconds()
+            res = {
+                "delta": timestamp_delta,
+                "due_date": str(due_date)
+            }
+        except:
+            res = {
+                "result": "No content"
+            }
+
+        return res
     
     @XBlock.json_handler
     def increment_count(self, data, suffix=''):
@@ -87,13 +102,15 @@ class TrafficLightXBlock(XBlock):
              """),
         ]
 
-def api_request ():
+def api_request (self):
+    course_id = "course-v1:"+str(self.scope_ids.usage_id.course_key)
+    # course_id = "course-v1:edX+DemoX+Demo_Course"
     api_path = "api/courses/v1/blocks/"
     headers = {
         "Authorization": "Bearer "+OPEN_EDX_COURSES_API_TOKEN
     }
     params = {
-        "course_id": "course-v1:edX+DemoX+Demo_Course", # TODO: Obtain it dinamically.
+        "course_id": course_id, # TODO: Obtain it dinamically.
         "username": OPEN_EDX_COURSES_API_USERNAME,
         "requested_fields": "due",
         "depth": "all"
