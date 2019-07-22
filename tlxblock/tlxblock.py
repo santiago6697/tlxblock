@@ -103,14 +103,14 @@ class TrafficLightXBlock(XBlock):
         ]
 
 def api_request (self):
-    course_id = "course-v1:"+str(self.scope_ids.usage_id.course_key)
+    course_id = str(self.scope_ids.usage_id.course_key)
     # course_id = "course-v1:edX+DemoX+Demo_Course"
     api_path = "api/courses/v1/blocks/"
     headers = {
         "Authorization": "Bearer "+OPEN_EDX_COURSES_API_TOKEN
     }
     params = {
-        "course_id": course_id, # TODO: Obtain it dinamically.
+        "course_id": course_id,
         "username": OPEN_EDX_COURSES_API_USERNAME,
         "requested_fields": "due",
         "depth": "all"
