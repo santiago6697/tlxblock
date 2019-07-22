@@ -24,19 +24,8 @@ function TrafficLightXBlock(runtime, element) {
             // Default resolution: No delta may be available, check Python script
             $('#snackbar', element).css("background-color", "blue");
         }
-        myFunction();
+        showSnackbar();
     }
-
-    // var handlerUrl = runtime.handlerUrl(element, 'increment_count');
-
-    // $('p', element).click(function(eventObject) {
-    //     $.ajax({
-    //         type: "POST",
-    //         url: handlerUrl,
-    //         data: JSON.stringify({"hello": "world"}),
-    //         success: updateCount
-    //     });
-    // });
 
     var handlerUrl = runtime.handlerUrl(element, 'traffic_light');
 
@@ -54,7 +43,7 @@ function TrafficLightXBlock(runtime, element) {
     });
 }
 
-function myFunction() {
+function showSnackbar() {
     var snackbar = document.getElementById("snackbar");
     snackbar.className = "show";
     setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 10000);
