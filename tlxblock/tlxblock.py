@@ -54,35 +54,32 @@ class TrafficLightXBlock(XBlock):
     @XBlock.json_handler
     def traffic_light (self, data, suffix=''):
         res = {}
-        try:
-            req = api_request(self)
+        
+        req = open_edx_api_request(self)
+        if req:
             blocks = json.loads(req.content)['blocks']
-            due_date = blocks[str(self.parent)]['due']
-            # due_date = blocks["block-v1:edX+DemoX+Demo_Course+type@vertical+block@934cc32c177d41b580c8413e561346b3"]['due']
+            try:
+                due_date = blocks[str(self.parent)]['due']
+            except:
+                due_date = blocks["block-v1:edX+DemoX+Demo_Course+type@vertical+block@934cc32c177d41b580c8413e561346b3"]['due']
             due_date = datetime.strptime(due_date, '%Y-%m-%dT%H:%M:%SZ')
-            date_now = datetime.now()
+            date_now = time_api_request()
+            if date_now:
+                date_now = json.loads(date_now.content)["utc_datetime"]
+                date_now = datetime.strptime(date_now.split("+")[0], '%Y-%m-%dT%H:%M:%S.%f')
+            else:
+                date_now = datetime.now()
             timestamp_delta = (due_date - date_now).total_seconds()
             res = {
                 "delta": timestamp_delta,
                 "due_date": str(due_date)
             }
-        except:
+        else:
             res = {
                 "result": "No content"
             }
 
         return res
-    
-    @XBlock.json_handler
-    def increment_count(self, data, suffix=''):
-        """
-        An example handler, which increments the data.
-        """
-        # Just to show data coming in...
-        assert data['hello'] == 'world'
-
-        self.count += 1
-        return {"count": self.count}
 
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.
@@ -102,9 +99,11 @@ class TrafficLightXBlock(XBlock):
              """),
         ]
 
-def api_request (self):
-    course_id = str(self.scope_ids.usage_id.course_key)
-    # course_id = "course-v1:edX+DemoX+Demo_Course"
+def open_edx_api_request (self):
+    try:
+        course_id = str(self.scope_ids.usage_id.course_key)
+    except:
+        course_id = "course-v1:edX+DemoX+Demo_Course"
     api_path = "api/courses/v1/blocks/"
     headers = {
         "Authorization": "Bearer "+OPEN_EDX_COURSES_API_TOKEN
@@ -116,4 +115,8 @@ def api_request (self):
         "depth": "all"
     }
     return requests.get(url = OPEN_EDX_URI+api_path, params = params, headers = headers)
+
+def time_api_request ():
+    api_path = "http://worldtimeapi.org/api/timezone/Etc/GMT"
+    return requests.get(url = api_path)
     
